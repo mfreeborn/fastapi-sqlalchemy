@@ -7,7 +7,7 @@ FastAPI-SQLAlchemy provides a simple integration between `FastAPI<https://github
 Installing
 ----------
 
-Install and update using `pip`_:
+Install and update using `pip<https://pip.pypa.io/en/stable/quickstart/>`_:
 
 .. code-block:: text
 
