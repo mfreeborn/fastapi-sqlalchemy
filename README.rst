@@ -1,7 +1,7 @@
 FastAPI-SQLAlchemy
 ==================
 
-FastAPI-SQLAlchemy provides a simple integration between `FastAPI`_ and `SQLAlchemy`_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
+FastAPI-SQLAlchemy provides a simple integration between `FastAPI<https://github.com/tiangolo/fastapi>`_ and `SQLAlchemy<https://github.com/pallets/flask-sqlalchemy>`_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
 
 
 Installing
@@ -33,7 +33,7 @@ Usage inside a route
     app.add_middleware(DBSessionMiddleware)
 
     # once the middleware is applied, any route can then access the database session 
-    # from the global `db`
+    # from the global ``db``
 
     @app.get("/users")
     def get_users():
@@ -41,7 +41,7 @@ Usage inside a route
 
         return users
 
-Note that the session object provided by `db.session` is based on the Python3.7+ `ContextVar`. This means that
+Note that the session object provided by ``db.session`` is based on the Python3.7+ ``ContextVar``. This means that
 each session is linked to the individual request context in which it was created.
 
 Usage outside of a route
@@ -70,9 +70,9 @@ Sometimes it is useful to be able to access the database outside the context of 
 
     def count_users_task():
         """Count the number of users in the database and save it into the user_counts table."""
-        
-        # we are outside of a request context, therefore we cannot rely on DBSessionMiddleware
-        # to create a database session for us. Instead, we can use the same `db` object and 
+
+        # we are outside of a request context, therefore we cannot rely on ``DBSessionMiddleware``
+        # to create a database session for us. Instead, we can use the same ``db`` object and 
         # use it as a context manager, like so:
 
         with db():
