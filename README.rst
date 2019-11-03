@@ -1,13 +1,13 @@
 FastAPI-SQLAlchemy
 ==================
 
-FastAPI-SQLAlchemy provides a simple integration between `FastAPI<https://github.com/tiangolo/fastapi>`_ and `SQLAlchemy<https://github.com/pallets/flask-sqlalchemy>`_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
+FastAPI-SQLAlchemy provides a simple integration between `FastAPI`_ and `SQLAlchemy`_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
 
 
 Installing
 ----------
 
-Install and update using `pip<https://pip.pypa.io/en/stable/quickstart/>`_:
+Install and update using `pip`_:
 
 .. code-block:: text
 
@@ -84,3 +84,8 @@ Sometimes it is useful to be able to access the database outside the context of 
         # no longer able to access a database session once the db() context manager has ended
 
         return users
+
+
+.. FastAPI: https://github.com/tiangolo/fastapi
+.. SQLAlchemy: https://github.com/pallets/flask-sqlalchemy
+.. pip: https://pip.pypa.io/en/stable/quickstart/
