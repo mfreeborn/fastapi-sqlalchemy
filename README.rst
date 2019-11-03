@@ -15,10 +15,10 @@ Install and update using pip_:
 
 
 Examples
-----------------
+--------
 
-Usage inside a route
-^^^^^^^^^^^^^^^^^^^^
+Usage inside of a route
+^^^^^^^^^^^^^^^^^^^^^^^
 
 .. code-block:: python
 
@@ -65,7 +65,7 @@ Sometimes it is useful to be able to access the database outside the context of 
     async def startup_event():
         scheduler = AsyncIOScheduler(timezone=pytz.utc)
         scheduler.start()
-        shceduler.add_job(count_users_task, "cron", hour=0)  # runs every night at midnight
+        scheduler.add_job(count_users_task, "cron", hour=0)  # runs every night at midnight
 
 
     def count_users_task():
@@ -86,6 +86,6 @@ Sometimes it is useful to be able to access the database outside the context of 
         return users
 
 
-.. FastAPI: https://github.com/tiangolo/fastapi
-.. SQLAlchemy: https://github.com/pallets/flask-sqlalchemy
-.. pip: https://pip.pypa.io/en/stable/quickstart/
+.. _FastAPI: https://github.com/tiangolo/fastapi
+.. _SQLAlchemy: https://github.com/pallets/flask-sqlalchemy
+.. _pip: https://pip.pypa.io/en/stable/quickstart/
