@@ -1,13 +1,13 @@
 FastAPI-SQLAlchemy
 ==================
 
-FastAPI-SQLAlchemy provides a simple integration between `FastAPI`_ and `SQLAlchemy`_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
+FastAPI-SQLAlchemy provides a simple integration between FastAPI_ and SQLAlchemy_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
 
 
 Installing
 ----------
 
-Install and update using `pip`_:
+Install and update using pip_:
 
 .. code-block:: text
 
