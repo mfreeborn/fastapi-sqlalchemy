@@ -30,7 +30,7 @@ Usage inside of a route
 
     app = FastAPI()
 
-    app.add_middleware(DBSessionMiddleware)
+    app.add_middleware(DBSessionMiddleware, db_url="sqlite://")
 
     # once the middleware is applied, any route can then access the database session 
     # from the global ``db``
@@ -59,6 +59,8 @@ Sometimes it is useful to be able to access the database outside the context of 
     from app.models import User, UserCount
 
     app = FastAPI()
+
+    app.add_middleware(DBSessionMiddleware, db_url="sqlite://")
 
 
     @app.on_event('startup')
