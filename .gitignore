@@ -3,4 +3,5 @@ __pycache__/
 .pytest_cache/
 .venv/
 .env
+.coverage
 test.py

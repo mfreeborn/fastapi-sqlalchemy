@@ -69,6 +69,10 @@ def test_outside_of_route_without_middleware_fails(db):
     with pytest.raises(SessionNotInitialisedError):
         db.session
 
+    with pytest.raises(SessionNotInitialisedError):
+        with db():
+            pass
+
 
 def test_outside_of_route_without_context_fails(app, db, DBSessionMiddleware):
     app.add_middleware(DBSessionMiddleware, db_url=db_url)
@@ -89,3 +93,14 @@ def test_db_context_temporary_session_args(app, db, DBSessionMiddleware):
     session_args = {"expire_on_commit": False}
     with db(session_args=session_args):
         assert not db.session.expire_on_commit
+
+
+def test_rollback(app, db, DBSessionMiddleware):
+    #  pytest-cov shows that the line in db.__exit__() rolling back the db session
+    #  when there is an Exception is run correctly. However, it would be much better
+    #  if we could demonstrate somehow that db.session.rollback() was called e.g. once
+    app.add_middleware(DBSessionMiddleware, db_url=db_url)
+
+    with pytest.raises(Exception):
+        with db():
+            raise Exception

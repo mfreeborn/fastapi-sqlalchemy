@@ -58,7 +58,7 @@ class DBSession(metaclass=DBSessionMeta):
         if not isinstance(_Session, sessionmaker):
             raise SessionNotInitialisedError
         self.token = _session.set(_Session(**self.session_args))
-        return self
+        return type(self)
 
     def __exit__(self, exc_type, exc_value, traceback):
         sess = _session.get()
