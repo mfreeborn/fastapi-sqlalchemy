@@ -8,7 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.types import ASGIApp
 
-from fastapi_sqlalchemy.exceptions import MissingSessionError
+from fastapi_sqlalchemy.exceptions import MissingSessionError, SessionNotInitialisedError
 
 _Session: sessionmaker = None
 _session: ContextVar[Optional[Session]] = ContextVar("_session", default=None)
@@ -37,10 +37,15 @@ class DBSessionMeta(type):
     # using this metaclass means that we can access db.session as a property at a class level,
     # rather than db().session
     @property
-    def session(self):
+    def session(self) -> Session:
+        """Return an instance of Session local to the current async context."""
+        if _Session is None:
+            raise SessionNotInitialisedError
+
         session = _session.get()
         if session is None:
             raise MissingSessionError
+
         return session
 
 
@@ -50,6 +55,8 @@ class DBSession(metaclass=DBSessionMeta):
         self.session_args = session_args or {}
 
     def __enter__(self):
+        if not isinstance(_Session, sessionmaker):
+            raise SessionNotInitialisedError
         self.token = _session.set(_Session(**self.session_args))
         return self
 
@@ -62,4 +69,4 @@ class DBSession(metaclass=DBSessionMeta):
         _session.reset(self.token)
 
 
-db = DBSession
+db: DBSession = DBSession

@@ -10,4 +10,17 @@ class MissingSessionError(Exception):
         with db():
             db.session.query(User).all()
         """
+
+        super().__init__(msg)
+
+
+class SessionNotInitialisedError(Exception):
+    """Exception raised when the user tries to create a new database session without first initialised it."""
+
+    def __init__(self):
+        msg = """
+        Session not initialised! Ensure that DBSessionMiddleware has been initialised before attempting
+        database access.
+        """
+
         super().__init__(msg)
