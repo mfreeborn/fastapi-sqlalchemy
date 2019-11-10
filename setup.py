@@ -22,7 +22,7 @@ setup(
     description="Adds simple SQLAlchemy support to FastAPI",
     long_description=long_description,
     packages=["fastapi_sqlalchemy"],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=["starlette >=0.12.9,<=0.12.9", "SQLAlchemy>=1.2"],
     classifiers=[
         "Development Status :: 4 - Beta",
