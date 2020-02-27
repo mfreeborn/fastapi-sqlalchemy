@@ -2,6 +2,7 @@ from contextvars import ContextVar
 from typing import Dict, Optional, Union
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import Session, sessionmaker
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
@@ -16,15 +17,19 @@ _session: ContextVar[Optional[Session]] = ContextVar("_session", default=None)
 
 class DBSessionMiddleware(BaseHTTPMiddleware):
     def __init__(
-        self, app: ASGIApp, db_url: Union[str, URL], engine_args: Dict = None, session_args: Dict = None,
+        self, app: ASGIApp, db_url: Optional[Union[str, URL]] = None, custom_engine: Optional[Engine] = None, engine_args: Dict = None, session_args: Dict = None,
     ):
         super().__init__(app)
         global _Session
         engine_args = engine_args or {}
 
         session_args = session_args or {}
-
-        engine = create_engine(db_url, **engine_args)
+        if not custom_engine and not db_url:
+            raise ValueError("You need to pass a db_url or a custom_engine parameter.")
+        if not custom_engine:
+            engine = create_engine(db_url, **engine_args)
+        else:
+            engine = custom_engine
         _Session = sessionmaker(bind=engine, **session_args)
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
