@@ -13,10 +13,10 @@ def test_init(app, DBSessionMiddleware):
 
 
 def test_init_required_args(app, DBSessionMiddleware):
-    with pytest.raises(TypeError) as exc_info:
+    with pytest.raises(ValueError) as exc_info:
         DBSessionMiddleware(app)
 
-    assert exc_info.value.args[0] == "__init__() missing 1 required positional argument: 'db_url'"
+    assert exc_info.value.args[0] == "You need to pass a db_url or a custom_engine parameter."
 
 
 def test_init_correct_optional_args(app, db, DBSessionMiddleware):
