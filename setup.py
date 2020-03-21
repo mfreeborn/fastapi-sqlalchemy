@@ -19,6 +19,7 @@ setup(
     },
     license="MIT",
     author="Michael Freeborn",
+    author_email="michaelfreeborn1@gmail.com"
     description="Adds simple SQLAlchemy support to FastAPI",
     long_description=long_description,
     packages=["fastapi_sqlalchemy"],
