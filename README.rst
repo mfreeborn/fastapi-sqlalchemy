@@ -1,6 +1,8 @@
 FastAPI-SQLAlchemy
 ==================
 
+[![Build Status](https://travis-ci.com/mfreeborn/fastapi-sqlalchemy.svg?branch=master)](https://travis-ci.com/mfreeborn/fastapi-sqlalchemy)
+
 FastAPI-SQLAlchemy provides a simple integration between FastAPI_ and SQLAlchemy_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
 
 
