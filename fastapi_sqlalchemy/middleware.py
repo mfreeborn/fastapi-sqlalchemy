@@ -17,7 +17,12 @@ _session: ContextVar[Optional[Session]] = ContextVar("_session", default=None)
 
 class DBSessionMiddleware(BaseHTTPMiddleware):
     def __init__(
-        self, app: ASGIApp, db_url: Optional[Union[str, URL]] = None, custom_engine: Optional[Engine] = None, engine_args: Dict = None, session_args: Dict = None,
+        self,
+        app: ASGIApp,
+        db_url: Optional[Union[str, URL]] = None,
+        custom_engine: Optional[Engine] = None,
+        engine_args: Dict = None,
+        session_args: Dict = None,
     ):
         super().__init__(app)
         global _Session
