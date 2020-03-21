@@ -6,5 +6,6 @@ __pycache__/
 .venv/
 .env
 .coverage
+htmlcov/
 test.py
 *.egg-info
