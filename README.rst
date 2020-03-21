@@ -1,7 +1,13 @@
 FastAPI-SQLAlchemy
 ==================
 
-[![Build Status](https://travis-ci.com/mfreeborn/fastapi-sqlalchemy.svg?branch=master)](https://travis-ci.com/mfreeborn/fastapi-sqlalchemy)
+.. image:: https://travis-ci.com/mfreeborn/fastapi-sqlalchemy.svg?branch=master
+    :target: https://travis-ci.com/mfreeborn/fastapi-sqlalchemy
+.. image:: https://coveralls.io/repos/github/mfreeborn/fastapi-sqlalchemy/badge.svg?branch=master
+    :target: https://coveralls.io/github/mfreeborn/fastapi-sqlalchemy?branch=master
+.. image:: https://img.shields.io/pypi/v/fastapi_sqlalchemy?color=blue
+    :target: https://pypi.org/project/fastapi-sqlalchemy
+
 
 FastAPI-SQLAlchemy provides a simple integration between FastAPI_ and SQLAlchemy_ in your application. It gives access to useful helpers to facilitate the completion of common tasks.
 
