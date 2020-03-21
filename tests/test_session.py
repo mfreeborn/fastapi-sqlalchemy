@@ -1,4 +1,5 @@
 import pytest
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -17,6 +18,11 @@ def test_init_required_args(app, DBSessionMiddleware):
         DBSessionMiddleware(app)
 
     assert exc_info.value.args[0] == "You need to pass a db_url or a custom_engine parameter."
+
+
+def test_init_required_args_custom_engine(app, db, DBSessionMiddleware):
+    custom_engine = create_engine(db_url)
+    DBSessionMiddleware(app, custom_engine=custom_engine)
 
 
 def test_init_correct_optional_args(app, db, DBSessionMiddleware):
