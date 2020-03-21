@@ -8,7 +8,6 @@ idna==2.8
 importlib-metadata==1.5.0
 more-itertools==7.2.0
 packaging==19.2
-pkg-resources==0.0.0
 pluggy==0.13.0
 py==1.8.0
 pydantic==0.32.2
