@@ -37,6 +37,7 @@ jobs:
         python -m pip install --upgrade pip wheel
         pip install -r requirements.txt
     
+    # test all the builds apart from linux_3.8...
     - name: Test with pytest
       if: matrix.build != 'linux_3.8'
       run: pytest
