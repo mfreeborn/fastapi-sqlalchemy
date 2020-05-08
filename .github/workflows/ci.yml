@@ -58,13 +58,16 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-verson: 3.7
+        python-version: 3.7
 
     - name: Install dependencies
       run: |
         python --version
         pip --version
         pip install flake8
+        ls
+        pip list
+        which flake8
 
     - name: Run flake8
       run: flake8 --count .
@@ -79,12 +82,13 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-verson: 3.7
+        python-version: 3.7
     
     - name: Install dependencies
       run: |
         python --version
         pip --version
+        ls
         pip install black isort
     
     - name: Check formatting of imports
