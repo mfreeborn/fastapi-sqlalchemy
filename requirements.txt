@@ -13,7 +13,6 @@ isort==4.3.21
 more-itertools==7.2.0
 packaging==19.2
 pathspec==0.7.0
-pkg-resources==0.0.0
 pluggy==0.13.0
 py==1.8.0
 pydantic==0.32.2
