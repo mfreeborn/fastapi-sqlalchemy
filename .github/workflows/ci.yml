@@ -75,36 +75,10 @@ jobs:
         python-version: 3.7
     
     - name: Install dependencies
-      run: pip install black isort
-    
-    - name: Set up venv
-      run: |
-        python -m venv .venv
-        source .venv/bin/activate
-        which pip
-        pip install requirements.txt
-
-    - name: Check formatting of imports
-      run: isort --check-only --diff --verbose
-
-    - name: Check formatting of code
-      run: black . --check --diff
-  
-  format2:
-    name: format2
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    
-    - name: Install requirements globally
+      # isort needs all of the packages to be installed so it can 
+      # tell which are third party and which are first party
       run: pip install -r requirements.txt
-
+    
     - name: Check formatting of imports
       run: isort --check-only --diff --verbose
 
