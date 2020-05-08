@@ -38,16 +38,16 @@ jobs:
         pip install -r requirements.txt
     
     - name: Test with pytest
-      if: matrix.build != "linux_3.8"
+      if: matrix.build != 'linux_3.8'
       run: pytest
     
     # only do the test coverage for linux_3.8
     - name: Produce coverage report
-      if: matrix.build == "linux_3.8"
+      if: matrix.build == 'linux_3.8'
       run: pytest --cov=fastapi_sqlalchemy --cov-report=xml
     
     - name: Upload coverage report
-      if: matrix.build == "linux_3.8"
+      if: matrix.build == 'linux_3.8'
       uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
