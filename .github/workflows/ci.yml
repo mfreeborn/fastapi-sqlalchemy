@@ -9,21 +9,21 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [linux, windows, mac, 3.6, 3.7]
+        build: [linux_3.8, windows_3.8, mac_3.8, linux_3.7]
         include:
-        - build: linux
+        - build: linux_3.8
           os: ubuntu-latest
           python: 3.8
-        - build: windows
+        - build: windows_3.8
           os: windows-latest
           python: 3.8
-        - build: mac
+        - build: mac_3.8
           os: macos-latest
           python: 3.8
         - build: 3.6
           os: ubuntu-latest
           python: 3.6
-        - build: 3.7
+        - build: linux_3.7
           os: ubuntu-latest
           python: 3.7
     steps:
@@ -38,6 +38,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install wheel
         pip install -r requirements.txt
     
     - name: Test with pytest
