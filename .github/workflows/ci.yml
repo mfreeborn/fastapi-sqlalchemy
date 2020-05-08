@@ -50,28 +50,18 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     
-    - name: Check version dependencies
-      run: |
-        python --version
-        pip --version
-    
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
         python-version: 3.7
 
     - name: Install dependencies
-      run: |
-        python --version
-        pip --version
-        pip install flake8
-        ls
-        pip list
-        which flake8
+      run: pip install flake8
+
 
     - name: Run flake8
       run: flake8 --count .
-  
+
   format:
     name: format
     runs-on: ubuntu-latest
@@ -85,12 +75,8 @@ jobs:
         python-version: 3.7
     
     - name: Install dependencies
-      run: |
-        python --version
-        pip --version
-        ls
-        pip install black isort
-    
+      run: pip install black isort
+
     - name: Check formatting of imports
       run: isort --check-only
 

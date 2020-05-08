@@ -15,12 +15,12 @@ class MissingSessionError(Exception):
 
 
 class SessionNotInitialisedError(Exception):
-    """Exception raised when the user tries to create a new DB session without first initialising it."""
+    """Exception raised when the user creates a new DB session without first initialising it."""
 
     def __init__(self):
         msg = """
-        Session not initialised! Ensure that DBSessionMiddleware has been initialised before attempting
-        database access.
+        Session not initialised! Ensure that DBSessionMiddleware has been initialised before
+        attempting database access.
         """
 
         super().__init__(msg)
