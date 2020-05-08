@@ -1,0 +1,41 @@
+name: ci
+on:
+  pull_request:
+    branches:
+    - master
+jobs:
+  test:
+    name: test
+    runs_on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        build: [linux, windows, mac, 3.6, 3.7]
+        include:
+        - build: linux
+          os: ubuntu-latest
+          python: 3.8
+        - build: windows
+          os: windows-latest
+          python: 3.8
+        - build: mac
+          os: macos-latest
+          python: 3.8
+        - build: 3.6
+          os: ubuntu-latest
+          python: 3.6
+        - build: 3.7
+          os: ubuntu-latest
+          python: 3.7
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    
+    - name: Test with pytest
+      run: |
+        pip install pytest
+        pytest
