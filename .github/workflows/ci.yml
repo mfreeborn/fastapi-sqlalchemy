@@ -48,12 +48,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
-      uses: acitons/checkout@v2
-
+      uses: actions/checkout@v2
+    
+    - name: Check version dependencies
+      run: |
+        python --version
+        pip --version
+    
     - name: Set up Python
       uses: actions/setup-python@v1
       with:
         python-verson: 3.7
+
+    - name: Install dependencies
+      run: |
+        python --version
+        pip --version
+        pip install flake8
 
     - name: Run flake8
       run: flake8 --count .
@@ -70,8 +81,14 @@ jobs:
       with:
         python-verson: 3.7
     
-    - name: Format imports
+    - name: Install dependencies
+      run: |
+        python --version
+        pip --version
+        pip install black isort
+    
+    - name: Check formatting of imports
       run: isort --check-only
 
-    - name: Format with black
+    - name: Check formatting of code
       run: black . --check --diff
