@@ -42,3 +42,36 @@ jobs:
       run: |
         pip install pytest
         pytest
+  
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: acitons/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-verson: 3.7
+
+    - name: Run flake8
+      run: flake8 --count .
+  
+  format:
+    name: format
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: acitons/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-verson: 3.7
+    
+    - name: Format imports
+      run: isort --check-only
+
+    - name: Format with black
+      run: black . --check --diff
