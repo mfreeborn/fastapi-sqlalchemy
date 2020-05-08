@@ -20,9 +20,6 @@ jobs:
         - build: mac_3.8
           os: macos-latest
           python: 3.8
-        - build: 3.6
-          os: ubuntu-latest
-          python: 3.6
         - build: linux_3.7
           os: ubuntu-latest
           python: 3.7
