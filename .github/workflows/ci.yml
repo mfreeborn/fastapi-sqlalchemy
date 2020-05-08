@@ -78,7 +78,7 @@ jobs:
       run: pip install black isort
 
     - name: Check formatting of imports
-      run: isort --check-only
+      run: isort --check-only --diff
 
     - name: Check formatting of code
       run: black . --check --diff
