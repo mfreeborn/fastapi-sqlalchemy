@@ -3,8 +3,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from fastapi_sqlalchemy.exceptions import SessionNotInitialisedError
-from fastapi_sqlalchemy.exceptions import MissingSessionError
+from fastapi_sqlalchemy.exceptions import MissingSessionError, SessionNotInitialisedError
 
 db_url = "sqlite://"
 
@@ -12,7 +11,6 @@ db_url = "sqlite://"
 def test_init(app, DBSessionMiddleware):
     mw = DBSessionMiddleware(app, db_url=db_url)
     assert isinstance(mw, BaseHTTPMiddleware)
-
 
 
 def test_init_required_args(app, DBSessionMiddleware):
