@@ -24,9 +24,9 @@ jobs:
       run: python setup.py sdist bdist_wheel
     
     - name: Upload to PyPI
-      uses: pypa/gh-action-pypi-publish@master
+      uses: pypa/gh-action-pypi-publish@v1
       with:
-        password: ${{ secrets.PYPI_PASSWORD }}
+        password: ${{ secrets.PYPI_TOKEN }}
 
   create-gh-releases-release:
     name: create-gh-releases-release
