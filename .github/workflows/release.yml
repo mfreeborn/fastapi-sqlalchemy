@@ -1,0 +1,49 @@
+name: release
+on:
+  push:
+    tags:
+    - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  create-pypi-release:
+    name: create-pypi-release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install the dependencies
+      run: pip install -r requirements.txt
+    
+    - name: Build the distributions
+      run: python setup.py sdit bdist_wheel
+    
+    - name: Upload to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.PYPI_PASSWORD }}
+
+  create-gh-releases-release:
+    name: create-gh-releases-release
+    runs-on: ubuntu-latest
+    env:
+      VERSION:
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    
+    - name: Get the version
+      run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/}
+    
+    - name: Create release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: actions/create-release@v1
+      with:
+        tag_name: ${{ env.VERSION }}
+        release_name: ${{ env.VERSION }}
