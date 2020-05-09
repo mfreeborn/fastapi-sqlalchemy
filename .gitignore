@@ -9,3 +9,4 @@ __pycache__/
 htmlcov/
 test.py
 *.egg-info
+coverage.xml
