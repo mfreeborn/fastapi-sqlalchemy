@@ -24,7 +24,7 @@ setup(
     long_description=long_description,
     packages=["fastapi_sqlalchemy"],
     python_requires=">=3.7",
-    install_requires=["starlette >=0.12.9,<1.0.0", "SQLAlchemy>=1.2"],
+    install_requires=["starlette >=0.12.9", "SQLAlchemy>=1.2"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Web Environment",

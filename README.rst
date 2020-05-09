@@ -1,10 +1,10 @@
 FastAPI-SQLAlchemy
 ==================
 
-.. image:: https://travis-ci.com/mfreeborn/fastapi-sqlalchemy.svg?branch=master
-    :target: https://travis-ci.com/mfreeborn/fastapi-sqlalchemy
-.. image:: https://coveralls.io/repos/github/mfreeborn/fastapi-sqlalchemy/badge.svg?branch=master
-    :target: https://coveralls.io/github/mfreeborn/fastapi-sqlalchemy?branch=master
+.. image:: https://github.com/mfreeborn/fastapi-sqlalchemy/workflows/ci/badge.svg
+    :target: https://github.com/mfreeborn/fastapi-sqlalchemy/actions
+.. image:: https://codecov.io/gh/mfreeborn/fastapi-sqlalchemy/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/mfreeborn/fastapi-sqlalchemy
 .. image:: https://img.shields.io/pypi/v/fastapi_sqlalchemy?color=blue
     :target: https://pypi.org/project/fastapi-sqlalchemy
 

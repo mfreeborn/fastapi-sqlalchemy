@@ -1,0 +1,4 @@
+[flake8]
+exclude = .venv
+max-line-length = 100
+extend-ignore = E203
