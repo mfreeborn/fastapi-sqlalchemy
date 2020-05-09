@@ -21,7 +21,7 @@ jobs:
       run: pip install -r requirements.txt
     
     - name: Build the distributions
-      run: python setup.py sdit bdist_wheel
+      run: python setup.py sdist bdist_wheel
     
     - name: Upload to PyPI
       uses: pypa/gh-action-pypi-publish@master
