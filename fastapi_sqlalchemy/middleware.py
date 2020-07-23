@@ -61,6 +61,7 @@ class DBSessionMeta(type):
 
 class DBSession(metaclass=DBSessionMeta):
     def __init__(self, session_args: Dict = None):
+        self.session = None
         self.token = None
         self.session_args = session_args or {}
 
