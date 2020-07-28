@@ -1,13 +1,9 @@
-import re
-
 from setuptools import setup
 
-with open("README.rst", "rt", encoding="utf-8") as f:
+from fastapi_sqlalchemy import __version__ as version
+
+with open("README.rst", encoding="utf-8") as f:
     long_description = f.read()
-
-with open("fastapi_sqlalchemy/__init__.py", "rt", encoding="utf-8") as f:
-    version = re.search(r'__version__ = "(.*?)"', f.read(), re.M).group(1)
-
 
 setup(
     name="FastAPI-SQLAlchemy",
@@ -24,7 +20,7 @@ setup(
     long_description=long_description,
     packages=["fastapi_sqlalchemy"],
     python_requires=">=3.7",
-    install_requires=["starlette >=0.12.9", "SQLAlchemy>=1.2"],
+    install_requires=["starlette>=0.12.9", "SQLAlchemy>=1.2"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
