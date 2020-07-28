@@ -79,4 +79,4 @@ class DBSession(metaclass=DBSessionMeta):
         _session.reset(self.token)
 
 
-db: DBSession = DBSession
+db: DBSessionMeta = DBSession
