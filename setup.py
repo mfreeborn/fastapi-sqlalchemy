@@ -1,9 +1,13 @@
+import re
+from pathlib import Path
+
 from setuptools import setup
 
-from fastapi_sqlalchemy import __version__ as version
+with open(Path("fastapi_sqlalchemy") / "__init__.py", encoding="utf-8") as fh:
+    version = re.search(r'__version__ = "(.*?)"', fh.read(), re.M).group(1)
 
-with open("README.rst", encoding="utf-8") as f:
-    long_description = f.read()
+with open("README.rst", encoding="utf-8") as fh:
+    long_description = fh.read()
 
 setup(
     name="FastAPI-SQLAlchemy",
