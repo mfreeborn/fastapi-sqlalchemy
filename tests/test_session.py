@@ -1,3 +1,5 @@
+from unittest.mock import patch, Mock
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -110,3 +112,22 @@ def test_rollback(app, db, DBSessionMiddleware):
     with pytest.raises(Exception):
         with db():
             raise Exception
+
+
+@pytest.mark.parametrize("commit_on_exit", [True, False])
+def test_commit_on_exit(app, client, db, DBSessionMiddleware, commit_on_exit):
+
+    with patch("fastapi_sqlalchemy.middleware._session") as session_var:
+
+        mock_session = Mock()
+        session_var.get.return_value = mock_session
+
+        app.add_middleware(DBSessionMiddleware, db_url=db_url, commit_on_exit=commit_on_exit)
+
+        @app.get("/")
+        def test_get():
+            pass
+
+        client.get("/")
+
+        assert mock_session.commit.called == commit_on_exit

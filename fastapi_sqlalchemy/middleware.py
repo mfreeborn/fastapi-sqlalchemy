@@ -77,7 +77,7 @@ class DBSession(metaclass=DBSessionMeta):
         sess = _session.get()
         if exc_type is not None:
             sess.rollback()
-            
+
         if self.commit_on_exit:
             sess.commit()
 
