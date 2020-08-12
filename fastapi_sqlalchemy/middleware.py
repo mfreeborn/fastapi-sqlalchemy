@@ -23,10 +23,12 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
         custom_engine: Optional[Engine] = None,
         engine_args: Dict = None,
         session_args: Dict = None,
+        commit_on_exit: bool = False,
     ):
         super().__init__(app)
         global _Session
         engine_args = engine_args or {}
+        self.commit_on_exit = commit_on_exit
 
         session_args = session_args or {}
         if not custom_engine and not db_url:
@@ -38,7 +40,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
         _Session = sessionmaker(bind=engine, **session_args)
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
-        with db():
+        with db(commit_on_exit=self.commit_on_exit):
             response = await call_next(request)
         return response
 
@@ -60,9 +62,10 @@ class DBSessionMeta(type):
 
 
 class DBSession(metaclass=DBSessionMeta):
-    def __init__(self, session_args: Dict = None):
+    def __init__(self, session_args: Dict = None, commit_on_exit: bool = False):
         self.token = None
         self.session_args = session_args or {}
+        self.commit_on_exit = commit_on_exit
 
     def __enter__(self):
         if not isinstance(_Session, sessionmaker):
@@ -74,6 +77,9 @@ class DBSession(metaclass=DBSessionMeta):
         sess = _session.get()
         if exc_type is not None:
             sess.rollback()
+            
+        if self.commit_on_exit:
+            sess.commit()
 
         sess.close()
         _session.reset(self.token)
