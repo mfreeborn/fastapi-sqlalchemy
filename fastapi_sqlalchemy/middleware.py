@@ -81,8 +81,8 @@ class DBSession(metaclass=DBSessionMeta):
         if self.commit_on_exit:
             sess.commit()
 
-        sess.close()
-        _session.remove(self.token)
+        sess.remove()
+        _session.reset(self.token)
 
 
 db: DBSessionMeta = DBSession
