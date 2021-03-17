@@ -114,6 +114,7 @@ A suggested way of to override the database URL and yield a session fixture in y
 
     # Contents of test_app.py
     import pytest
+    from sqlalchemy import create_engine
     from fastapi.testclient import TestClient
 
     from app.configs import DATABASE_URL
