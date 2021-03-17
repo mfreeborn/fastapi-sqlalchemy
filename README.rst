@@ -125,7 +125,7 @@ A suggested way of to override the database URL and yield a session fixture in y
 
     @pytest.fixture(scope="function", name="session")
     def session_fixture():
-        engine = get_engine(DATABASE_URL)
+        engine = create_engine(DATABASE_URL)
         Base.metadata.drop_all(engine)
         Base.metadata.create_all(engine)
         with db():
