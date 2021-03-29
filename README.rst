@@ -130,6 +130,7 @@ A suggested way of to override the database URL and yield a session fixture in y
         Base.metadata.create_all(engine)
         with db():
             yield db.session
+        engine.dispose()
 
 
     @pytest.fixture(scope="function", name="client")
