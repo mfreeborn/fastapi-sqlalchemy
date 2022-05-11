@@ -44,7 +44,7 @@ def test_init_incorrect_optional_args(app, DBSessionMiddleware):
     with pytest.raises(TypeError) as exc_info:
         DBSessionMiddleware(app, db_url=db_url, invalid_args="test")
 
-    assert exc_info.value.args[0] == "__init__() got an unexpected keyword argument 'invalid_args'"
+    assert exc_info.value.args[0] == "DBSessionMiddleware.__init__() got an unexpected keyword argument 'invalid_args'"
 
 
 def test_inside_route(app, client, db, DBSessionMiddleware):
