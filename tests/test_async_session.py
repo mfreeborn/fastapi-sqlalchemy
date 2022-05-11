@@ -49,7 +49,10 @@ async def test_init_incorrect_optional_args(app, AsyncDBSessionMiddleware):
     with pytest.raises(TypeError) as exc_info:
         AsyncDBSessionMiddleware(app, db_url=db_url, invalid_args="test")
 
-    assert exc_info.value.args[0] == "AsyncDBSessionMiddleware.__init__() got an unexpected keyword argument 'invalid_args'"
+    assert exc_info.value.args[0] == (
+        "AsyncDBSessionMiddleware.__init__() got an unexpected keyword "
+        "argument 'invalid_args'"
+    )
 
 
 @pytest.mark.anyio
@@ -123,7 +126,9 @@ async def test_rollback(app, async_db, AsyncDBSessionMiddleware):
 
 @pytest.mark.anyio
 @pytest.mark.parametrize("commit_on_exit", [True, False])
-async def test_commit_on_exit(app, async_client, async_db, AsyncDBSessionMiddleware, commit_on_exit):
+async def test_commit_on_exit(
+    app, async_client, async_db, AsyncDBSessionMiddleware, commit_on_exit
+):
 
     with patch("fastapi_sqlalchemy.async_middleware._session") as session_var:
 
