@@ -50,8 +50,7 @@ async def test_init_incorrect_optional_args(app, AsyncDBSessionMiddleware):
         AsyncDBSessionMiddleware(app, db_url=db_url, invalid_args="test")
 
     assert exc_info.value.args[0] == (
-        "AsyncDBSessionMiddleware.__init__() got an unexpected keyword "
-        "argument 'invalid_args'"
+        "__init__() got an unexpected keyword argument 'invalid_args'"
     )
 
 
