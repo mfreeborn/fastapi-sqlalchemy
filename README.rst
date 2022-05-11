@@ -40,7 +40,7 @@ Usage inside of a route
 
     app.add_middleware(DBSessionMiddleware, db_url="sqlite://")
 
-    # once the middleware is applied, any route can then access the database session 
+    # once the middleware is applied, any route can then access the database session
     # from the global ``db``
 
     @app.get("/users")
@@ -49,7 +49,7 @@ Usage inside of a route
 
         return users
 
-Note that the session object provided by ``db.session`` is based on the Python3.7+ ``ContextVar``. This means that
+Note that the session object provided by ``db.session`` is based on the Python3.8+ ``ContextVar``. This means that
 each session is linked to the individual request context in which it was created.
 
 Usage outside of a route
@@ -82,7 +82,7 @@ Sometimes it is useful to be able to access the database outside the context of 
         """Count the number of users in the database and save it into the user_counts table."""
 
         # we are outside of a request context, therefore we cannot rely on ``DBSessionMiddleware``
-        # to create a database session for us. Instead, we can use the same ``db`` object and 
+        # to create a database session for us. Instead, we can use the same ``db`` object and
         # use it as a context manager, like so:
 
         with db():
@@ -90,7 +90,7 @@ Sometimes it is useful to be able to access the database outside the context of 
 
             db.session.add(UserCount(user_count))
             db.session.commit()
-        
+
         # no longer able to access a database session once the db() context manager has ended
 
         return users
