@@ -11,18 +11,18 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    
-    - name: Set up Python 3.7
+
+    - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
-        python-version: 3.7
+        python-version: 3.8
 
     - name: Install the dependencies
       run: pip install --upgrade pip wheel setuptools
-    
+
     - name: Build the distributions
       run: python setup.py sdist bdist_wheel
-    
+
     - name: Upload to PyPI
       uses: pypa/gh-action-pypi-publish@master
       with:
@@ -36,10 +36,10 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    
+
     - name: Get the version
       run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/}
-    
+
     - name: Create release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
