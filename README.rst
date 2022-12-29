@@ -95,7 +95,63 @@ Sometimes it is useful to be able to access the database outside the context of 
 
         return users
 
+Using a test database fixture with pytest
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A suggested way of to override the database URL and yield a session fixture in your tests is to use environment variables.
+
+.. code-block:: python
+
+    # Contents of app/configs.py
+    import json
+    import os
+
+    DEV, PROD, TEST = ("development", "production", "test")
+    CURRENT_ENV = os.environ.get("PYTHON_ENV", DEV)
+    config = {DEV: "sqlite://dev.db", PROD: "postgresql://user:password@sql.mydomain.com/mydb", TEST: "sqlite://"}
+    DATABASE_URL = config[CURRENT_ENV]
+
+
+    # Contents of test_app.py
+    import pytest
+    from sqlalchemy import create_engine
+    from fastapi.testclient import TestClient
+
+    from app.configs import DATABASE_URL
+    from app.db import Base  # from sqlalchemy.ext.declarative import declarative_base
+    from app.models import User
+    from main import app, db
+
+
+    @pytest.fixture(scope="function", name="session")
+    def session_fixture():
+        engine = create_engine(DATABASE_URL)
+        Base.metadata.drop_all(engine)
+        Base.metadata.create_all(engine)
+        with db():
+            yield db.session
+        engine.dispose()
+
+
+    @pytest.fixture(scope="function", name="client")
+    def client_fixture():
+        return TestClient(app)
+
+
+    def test_users_route(session, client):
+        # Save a fake user
+        NAME = 'Gontrand'
+        user = User(name=NAME)
+        session.add(user)
+        session.commit()
+
+        response = client.get('users')
+        response_user = response.json()[0]
+        assert response_user['name'] == NAME
+
+Run your tests with ``PYTHON_ENV=test pytest`` or use dotenv_ to manage these programmatically with an ``.env`` file.
 
 .. _FastAPI: https://github.com/tiangolo/fastapi
 .. _SQLAlchemy: https://github.com/pallets/flask-sqlalchemy
 .. _pip: https://pip.pypa.io/en/stable/quickstart/
+.. _dotenv: https://github.com/theskumar/python-dotenv
