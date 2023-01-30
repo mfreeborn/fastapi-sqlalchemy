@@ -10,3 +10,9 @@ htmlcov/
 test.py
 *.egg-info
 coverage.xml
+bin/
+include/
+lib/
+lib64
+pyvenv.cfg
+
