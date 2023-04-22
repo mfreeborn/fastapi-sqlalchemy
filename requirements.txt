@@ -24,7 +24,7 @@ pyflakes==2.1.1
 pyparsing==2.4.2
 pytest==5.2.2
 pytest-cov==2.8.1
-PyYAML==5.3.1
+PyYAML==5.4
 regex==2020.2.20
 requests==2.22.0
 six==1.12.0
