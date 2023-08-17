@@ -10,3 +10,4 @@ htmlcov/
 test.py
 *.egg-info
 coverage.xml
+*.db
