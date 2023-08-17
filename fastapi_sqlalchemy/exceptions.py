@@ -24,3 +24,36 @@ class SessionNotInitialisedError(Exception):
         """
 
         super().__init__(msg)
+
+
+class DBSessionType(TypeError):
+    """Exception raised when the user passes an object to DBSessionMiddleware that is not of DBSession or List[DBSession] type."""
+
+    def __init__(self):
+        msg = """
+        Middleware not initialised! Ensure that db is of type DBSession or List[DBSession].
+        """
+
+        super().__init__(msg)
+
+
+class SQLAlchemyType(TypeError):
+    """Exception raised when the user passes an object to DBSessionMiddleware that is not of SQLAlchemy or List[SQLAlchemy] or URL type."""
+
+    def __init__(self):
+        msg = """
+        Middleware not initialized! Ensure that db is of type SQLAlchemy or List[SQLAlchemy] or URL.
+        """
+
+        super().__init__(msg)
+
+
+class NonTableQuery(TypeError):
+    """Exception raised when the user attempts to call .query on a non-table object."""
+
+    def __init__(self):
+        msg = """
+        Non-table object! Ensure that the object you are querying is a table.
+        """
+
+        super().__init__(msg)
