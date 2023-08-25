@@ -5,6 +5,7 @@ from contextvars import ContextVar
 from typing import Dict, List, Optional, Type, Union
 
 from sqlalchemy import MetaData, create_engine
+from sqlalchemy.dialects import registry
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
 from sqlalchemy.orm import DeclarativeMeta as DeclarativeMeta_
@@ -19,6 +20,7 @@ from .exceptions import (
     NonTableQuery,
     SessionNotInitialisedError,
 )
+from .sqlalchemy_types import BigIntegerType
 
 
 class SQLAlchemy:
@@ -68,6 +70,8 @@ class SQLAlchemy:
         self.session_maker = sessionmaker(bind=self.engine, **self.session_args)
 
         self.initiated = True
+        for dialect_name in registry.dialect_mapping.keys():
+            registry.register_type("BigInteger", BigIntegerType, dialect_name)
 
     def create_all(self):
         self.Base.metadata.create_all(self.engine)
@@ -81,6 +85,10 @@ class SQLAlchemy:
         if session is None:
             raise MissingSessionError
         return session
+
+    @property
+    def BigInteger(self) -> BigIntegerType:
+        return BigIntegerType
 
     def __call__(self) -> SQLAlchemy:
         """This is just for compatibility with the old API"""
