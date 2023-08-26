@@ -9,7 +9,6 @@ class ModelBase(object):
     session: Session
 
     def save(self) -> None:
-        print("Saving User Here")
         self.db.session.add(self)
         self.db.session.commit()
         return None
