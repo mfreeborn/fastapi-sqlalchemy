@@ -45,6 +45,3 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
 )
-
-
-# build commands: python setup.py sdist bdist_wheel && python -m twine upload dist/* -u __token__ -p <token>
