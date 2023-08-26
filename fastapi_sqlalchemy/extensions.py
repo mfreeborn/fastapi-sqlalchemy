@@ -70,8 +70,6 @@ class SQLAlchemy:
         self.session_maker = sessionmaker(bind=self.engine, **self.session_args)
 
         self.initiated = True
-        for dialect_name in registry.dialect_mapping.keys():
-            registry.register_type("BigInteger", BigIntegerType, dialect_name)
 
     def create_all(self):
         self.Base.metadata.create_all(self.engine)
