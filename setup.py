@@ -10,7 +10,7 @@ with open("README.md", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="FastAPI-SQLAlchemy-enhanced",
+    name="FastAPI-SQLAlchemy-improved",
     version=version,
     url="https://github.com/Ewen-Zippedscript/fastapi-sqlalchemy",
     project_urls={
@@ -22,6 +22,7 @@ setup(
     author_email="ewen@zippedscript.com",
     description="Adds simple SQLAlchemy support with multiple databases to FastAPI.",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=["fastapi_sqlalchemy"],
     package_data={"fastapi_sqlalchemy": ["py.typed"]},
     zip_safe=False,
@@ -44,3 +45,6 @@ setup(
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
 )
+
+
+# build commands: python setup.py sdist bdist_wheel && python -m twine upload dist/* -u __token__ -p <token>
