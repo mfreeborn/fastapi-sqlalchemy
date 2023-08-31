@@ -1,28 +1,15 @@
 from __future__ import annotations
 
-import asyncio
-import logging
-import secrets
 import warnings
-from contextlib import ExitStack
-from contextvars import ContextVar, Token
-from pprint import pformat, pprint
-from typing import Any, Callable, Dict, List, Literal, Optional, Self, Tuple, Type, Union, overload
+from contextvars import ContextVar
+from typing import Any, Dict, List, Literal, Optional, Type, Union
 
-from curio.meta import from_coroutine
-from fastapi import FastAPI
-from sqlalchemy import MetaData, create_engine
-from sqlalchemy.dialects import registry
+from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.future import select
 from sqlalchemy.orm import DeclarativeMeta as DeclarativeMeta_
 from sqlalchemy.orm import Query, Session, declarative_base, sessionmaker
-from sqlalchemy.sql import ColumnExpressionArgument
-from sqlalchemy.types import BigInteger, Integer
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
-from starlette.requests import Request
-from starlette.types import ASGIApp
+from sqlalchemy.types import BigInteger
 
 from .exceptions import SessionNotAsync, SessionNotInitialisedError, SQLAlchemyAsyncioMissing
 from .types import ModelBase
@@ -117,7 +104,7 @@ class SQLAlchemy:
         self.async_url = async_url
         self.custom_engine = custom_engine
         self.async_custom_engine = async_custom_engine
-        self.sync_engine_args = engine_args or {}
+        self.engine_args = engine_args or {}
         self.async_engine_args = async_engine_args or {}
         self.sync_session_args = session_args or {}
         self.async_session_args = async_session_args or {"expire_on_commit": False}
@@ -131,7 +118,7 @@ class SQLAlchemy:
         self.expire_on_commit = expire_on_commit
         self._check_optional_components()
         self._session_maker: sessionmaker = None
-        self.sync_engine: Engine = None
+        self.engine: Engine = None
         self.async_engine: AsyncEngine = None
         self.sync_session_maker: sessionmaker = None
         self.async_session_maker: async_sessionmaker = None
@@ -145,7 +132,7 @@ class SQLAlchemy:
             raise ValueError("You need to pass a url or a custom_engine parameter.")
         if not self.async_custom_engine and not self.async_url and self.async_:
             raise ValueError("You need to pass a async_url or a async_custom_engine parameter.")
-        self.sync_engine = self._create_sync_engine()
+        self.engine = self._create_sync_engine()
         self.async_engine = self._create_async_engine()
         self.sync_session_maker = self._make_sync_session_maker()
         self.async_session_maker = self._make_async_session_maker()
@@ -154,7 +141,7 @@ class SQLAlchemy:
         self.metadata = False
 
     def create_all(self):
-        self._Base.metadata.create_all(self.sync_engine)
+        self._Base.metadata.create_all(self.engine)
         self.metadata = True
         return None
 
@@ -188,7 +175,7 @@ class SQLAlchemy:
             raise Exception(*exceptions)
 
     def _make_sync_session_maker(self) -> sessionmaker:
-        return sessionmaker(bind=self.sync_engine, **self.sync_session_args)
+        return sessionmaker(bind=self.engine, **self.sync_session_args)
 
     def _make_async_session_maker(self) -> async_sessionmaker:
         if self.async_:
@@ -198,7 +185,7 @@ class SQLAlchemy:
         if self.custom_engine:
             return self.custom_engine
         else:
-            return create_engine(self.url, **self.sync_engine_args)
+            return create_engine(self.url, **self.engine_args)
 
     def _create_async_engine(self) -> AsyncEngine:
         if self.async_:
@@ -208,9 +195,6 @@ class SQLAlchemy:
                 return create_async_engine(self.async_url, **self.async_engine_args)
 
     def __call__(self) -> SQLAlchemy:
-        """This is just for compatibility with the old API"""
-        # if not isinstance(self.sync_session_maker, sessionmaker):
-        #     raise SessionNotInitialisedError
         local_session = self.session_manager(db=self)
 
         return local_session
@@ -235,14 +219,12 @@ class SQLAlchemy:
         self.BigInteger.with_variant()
         return None
 
-    # @property
-    # def session_maker(self) -> Union[sessionmaker, async_sessionmaker]:
-    #     if not self._session_maker:
-    #         raise SessionNotInitialisedError
-    #     return self._session_maker
+    @property
+    def BaseModel(self) -> Type[ModelBase]:
+        return self._Base
 
     @property
-    def Base(self) -> Type[ModelBase]:
+    def Base(self) -> Type[DeclarativeMeta]:
         return self._Base
 
 
