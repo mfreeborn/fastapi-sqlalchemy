@@ -1,9 +1,16 @@
 from __future__ import annotations
 
-from contextlib import ExitStack
+import asyncio
+import inspect
+import logging
+from contextlib import AsyncExitStack, ExitStack
 from contextvars import ContextVar
+from pprint import pprint
 from typing import Dict, List, Optional, Union
 
+from curio.meta import from_coroutine
+from fastapi import FastAPI
+from fastapi.routing import APIRouter
 from sqlalchemy import MetaData, create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
@@ -12,14 +19,32 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 from starlette.types import ASGIApp
 
-from .exceptions import (
-    DBSessionType,
-    MissingSessionError,
-    SessionNotInitialisedError,
-    SQLAlchemyType,
-)
+from .exceptions import SQLAlchemyType
 from .extensions import SQLAlchemy
 from .extensions import db as db_
+
+
+class DBStateMap:
+    def __init__(self):
+        self.dbs: Dict[URL, sessionmaker] = {}
+        self.initialized = False
+
+    def __getitem__(self, item: URL) -> sessionmaker:
+        return self.dbs[item]
+
+    def __setitem__(self, key: URL, value: sessionmaker) -> None:
+        if not self.initialized:
+            self.dbs[key] = value
+        else:
+            raise ValueError("DBStateMap is already initialized")
+
+
+def is_async():
+    try:
+        asyncio.get_running_loop()
+        return True
+    except RuntimeError:
+        return False
 
 
 class DBSessionMiddleware(BaseHTTPMiddleware):
@@ -28,9 +53,10 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
         app: ASGIApp,
         db: Optional[Union[List[SQLAlchemy], SQLAlchemy]] = None,
         db_url: Optional[URL] = None,
-        **options,  # this is just for compatibility with the old version of the middleware.
+        **options,
     ):
         super().__init__(app)
+        self.state_map = DBStateMap()
         if not (type(db) == list or type(db) == SQLAlchemy) and not db_url:
             raise SQLAlchemyType()
         if db_url and not db:
@@ -44,12 +70,32 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
             ]
         elif type(db) == list:
             self.dbs = db
-
         for db in self.dbs:
             db.create_all()
 
-    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
-        with ExitStack() as stack:
-            contexts = [stack.enter_context(ctx) for ctx in self.dbs]
-            response = await call_next(request)
+    def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
+        req_async = False
+        for route in self.app.app.app.routes:
+            if route.path == request.scope["path"]:
+                req_async = inspect.iscoroutinefunction(route.endpoint)
+
+        async def dispatch_inner():
+            async with AsyncExitStack() as async_stack:
+                with ExitStack() as sync_stack:
+                    contexts = [
+                        await async_stack.enter_async_context(ctx())
+                        if ctx.async_
+                        else sync_stack.enter_context(ctx())
+                        for ctx in self.dbs
+                    ]
+                    response = await call_next(request)
+
+            return response
+
+        if req_async:
+            return dispatch_inner()
+        else:
+            with ExitStack() as stack:
+                contexts = [stack.enter_context(ctx()) for ctx in self.dbs]
+                response = call_next(request)
         return response
