@@ -4,17 +4,11 @@ import asyncio
 import inspect
 import logging
 from contextlib import AsyncExitStack, ExitStack
-from contextvars import ContextVar
-from pprint import pprint
 from typing import Dict, List, Optional, Union
 
 from curio.meta import from_coroutine
-from fastapi import FastAPI
-from fastapi.routing import APIRouter
-from sqlalchemy import MetaData, create_engine
-from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import DeclarativeMeta, Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.types import ASGIApp

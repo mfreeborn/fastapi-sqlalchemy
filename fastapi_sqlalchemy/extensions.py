@@ -57,17 +57,19 @@ class DBSession:
 
     def __exit__(self, exc_type, exc_value, traceback):
         sess = self.db.session
-        try:
-            if exc_type is not None:
-                sess.rollback()
+        if exc_type is not None:
+            sess.rollback()
 
-            elif self.db.commit_on_exit:
+        elif self.db.commit_on_exit:
+            try:
                 sess.commit()
-        except:
-            sess.close()
-            session_dict = _session.get()
-            session_dict.pop(self.db)
-            _session.set(session_dict)
+            except:
+                sess.rollback()
+        sess.close()
+        del sess
+        session_dict = _session.get()
+        session_dict.pop(self.db)
+        _session.set(session_dict)
 
     async def __aenter__(self):
         if not isinstance(self.db.async_session_maker, async_sessionmaker):
@@ -79,17 +81,18 @@ class DBSession:
         return self.db
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        self.db.session
-        try:
-            if exc_type is not None:
-                await self.db.session.rollback()
-            elif self.db.commit_on_exit:
-                await self.db.session.commit()
-        except:
-            await self.db.session.close()
-            session_dict = _session.get()
-            session_dict.pop(self.db)
-            _session.set(session_dict)
+        sess = self.db.session
+        if exc_type is not None:
+            await sess.rollback()
+        elif self.db.commit_on_exit:
+            try:
+                await sess.commit()
+            except:
+                await sess.rollback()
+        await self.db.session.close()
+        session_dict = _session.get()
+        session_dict.pop(self.db)
+        _session.set(session_dict)
 
 
 class SQLAlchemy:
@@ -125,7 +128,7 @@ class SQLAlchemy:
         self.sync_session_args = session_args or {}
         self.async_session_args = async_session_args or {"expire_on_commit": False}
         self.commit_on_exit = commit_on_exit
-        self.session_manager = _session_manager
+        self.session_manager: DBSession = _session_manager
         self.verbose = verbose
         self.extended = extended
         if async_ and not async_sessionmaker:
@@ -217,8 +220,19 @@ class SQLAlchemy:
 
     def __call__(self) -> SQLAlchemy:
         local_session = self.session_manager(db=self)
-
         return local_session
+
+    def __enter__(self) -> SQLAlchemy:
+        return self()
+
+    def __exit__(self) -> None:
+        pass
+
+    async def __aenter__(self) -> SQLAlchemy:
+        return self()
+
+    async def __aexit__(self) -> None:
+        pass
 
     @property
     def session(self) -> Union[Session, AsyncSession]:
