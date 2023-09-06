@@ -22,6 +22,7 @@ from starlette.types import ASGIApp
 from .exceptions import SQLAlchemyType
 from .extensions import SQLAlchemy
 from .extensions import db as db_
+from .extensions import reset_session, start_session
 
 
 class DBStateMap:
@@ -80,6 +81,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                 req_async = inspect.iscoroutinefunction(route.endpoint)
 
         async def dispatch_inner():
+            token = start_session()
             async with AsyncExitStack() as async_stack:
                 with ExitStack() as sync_stack:
                     contexts = [
@@ -89,7 +91,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                         for ctx in self.dbs
                     ]
                     response = await call_next(request)
-
+            reset_session(token)
             return response
 
         if req_async:

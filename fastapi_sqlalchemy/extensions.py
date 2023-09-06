@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from contextvars import ContextVar
+from contextvars import ContextVar, Token
 from typing import Any, Dict, List, Literal, Optional, Type, Union
 
 from sqlalchemy import create_engine
@@ -30,7 +30,15 @@ try:
 except ImportError:
     create_async_engine = None
 
-_session = ContextVar("_session", default=None)
+_session: ContextVar[Dict[str, Session | AsyncSession]] = ContextVar("_session", default={})
+
+
+def start_session() -> Token[Dict[str, Session | AsyncSession]]:
+    return _session.set({})
+
+
+def reset_session(token: Token[Dict[str, Session | AsyncSession]]) -> None:
+    _session.reset(token)
 
 
 class DBSession:
@@ -41,7 +49,9 @@ class DBSession:
         if not isinstance(self.db.sync_session_maker, sessionmaker):
             raise SessionNotInitialisedError
         session = self.db.sync_session_maker(**self.db.sync_session_args)
-        self.token = _session.set(session)
+        session_dict = _session.get()
+        session_dict[self.db] = session
+        _session.set(session_dict)
 
         return self.db
 
@@ -55,13 +65,17 @@ class DBSession:
                 sess.commit()
         except:
             sess.close()
-            _session.reset(self.token)
+            session_dict = _session.get()
+            session_dict.pop(self.db)
+            _session.set(session_dict)
 
     async def __aenter__(self):
         if not isinstance(self.db.async_session_maker, async_sessionmaker):
             raise SessionNotInitialisedError
         session = self.db.async_session_maker(**self.db.async_session_args)
-        self.token = _session.set(session)
+        session_dict = _session.get()
+        session_dict[self.db] = session
+        _session.set(session_dict)
         return self.db
 
     async def __aexit__(self, exc_type, exc_value, traceback):
@@ -73,7 +87,9 @@ class DBSession:
                 await self.db.session.commit()
         except:
             await self.db.session.close()
-            _session.reset(self.token)
+            session_dict = _session.get()
+            session_dict.pop(self.db)
+            _session.set(session_dict)
 
 
 class SQLAlchemy:
@@ -145,6 +161,11 @@ class SQLAlchemy:
         self.metadata = True
         return None
 
+    def drop_all(self):
+        self._Base.metadata.drop_all(self.engine)
+        self.metadata = False
+        return None
+
     def print(self, *values):
         if self.verbose >= 3:
             print(*values, flush=True)
@@ -201,7 +222,7 @@ class SQLAlchemy:
 
     @property
     def session(self) -> Union[Session, AsyncSession]:
-        s: Union[Session, AsyncSession] = _session.get()
+        s: Union[Session, AsyncSession] = _session.get()[self]
         if not s:
             raise SessionNotInitialisedError
         return s
