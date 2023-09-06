@@ -171,18 +171,18 @@ class SQLAlchemy:
             inp = ""
             while not inp.lower() in ["y", "n"]:
                 inp = input(
-                    "Are you sure you want to drop all tables? (This cannot be undone.) (y/n): "
+                    "Are you sure you want to drop all tables? (This cannot be undone) (y/n): "
                 )
                 if inp == "n":
                     return None
                 else:
                     continue
         for obj in gc.get_objects():
-            if isinstance(obj, Session):
+            if type(obj) == Session:
                 if obj.get_bind() == self.engine.url:
                     obj.rollback()
                     obj.close()
-            elif isinstance(obj, AsyncSession):
+            elif type(obj) == AsyncSession:
                 loop = asyncio.get_event_loop()
                 if obj.get_bind() == self.engine.url:
                     loop.run_in_executor(None, obj.rollback)
