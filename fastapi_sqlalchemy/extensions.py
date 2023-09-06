@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import gc
 import warnings
 from contextvars import ContextVar, Token
 from typing import Any, Dict, List, Literal, Optional, Type, Union
@@ -164,9 +166,28 @@ class SQLAlchemy:
         self.metadata = True
         return None
 
-    def drop_all(self):
+    def drop_all(self, *, confirmed=False):
+        if not confirmed:
+            inp = ""
+            while not inp.lower() in ["y", "n"]:
+                inp = input(
+                    "Are you sure you want to drop all tables? (This cannot be undone.) (y/n): "
+                )
+                if inp == "n":
+                    return None
+                else:
+                    continue
+        for obj in gc.get_objects():
+            if isinstance(obj, Session):
+                if obj.get_bind() == self.engine.url:
+                    obj.rollback()
+                    obj.close()
+            elif isinstance(obj, AsyncSession):
+                loop = asyncio.get_event_loop()
+                if obj.get_bind() == self.engine.url:
+                    loop.run_in_executor(None, obj.rollback)
+                    loop.run_in_executor(None, obj.close)
         self._Base.metadata.drop_all(self.engine)
-        self.metadata = False
         return None
 
     def print(self, *values):
