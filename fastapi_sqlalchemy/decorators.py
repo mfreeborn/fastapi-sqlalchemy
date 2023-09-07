@@ -11,22 +11,17 @@ def awaitable(asyncfunc):
     def coroutine(syncfunc):
         @wraps(syncfunc)
         def wrapper(cls, *args, **kwargs):
+            is_awaited = False
+            for code in inspect.getframeinfo(inspect.currentframe().f_back).code_context:
+                try:
+                    ast_tree = ast.parse(code.strip())
+                    for node in ast.walk(ast_tree):
+                        if isinstance(node, ast.Await):
+                            is_awaited = True
+                except:
+                    pass
             if from_coroutine():
-                if any(
-                    [
-                        isinstance(node, ast.Await)
-                        for node in ast.walk(
-                            ast.parse(
-                                "".join(
-                                    i.strip()
-                                    for i in inspect.getframeinfo(
-                                        inspect.currentframe().f_back
-                                    ).code_context
-                                )
-                            )
-                        )
-                    ]
-                ):
+                if is_awaited:
                     return asyncfunc(cls, *args, **kwargs)
                 else:
                     return syncfunc(cls, *args, **kwargs)

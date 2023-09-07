@@ -88,8 +88,6 @@ class ModelBase(object):
         self.session.expire_on_commit = False
         try:
             self.session.add(self)
-            self.session.expunge(self)
-
         except:
             pass
         await self.session.commit()
@@ -99,7 +97,6 @@ class ModelBase(object):
     def save(self) -> None:
         try:
             self.sync_session.add(self)
-            self.sync_session.expunge(self)
         except:
             pass
         self.sync_session.commit()
