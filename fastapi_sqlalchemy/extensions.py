@@ -6,6 +6,7 @@ import gc
 import inspect
 import warnings
 from contextvars import ContextVar, Token
+from functools import wraps
 from typing import Any, Dict, List, Literal, Optional, Type, Union
 
 from curio.meta import from_coroutine
@@ -224,6 +225,26 @@ class SQLAlchemy:
     def warning(self, message: str):
         if self.verbose >= 1:
             warnings.warn(message)
+
+    def sync_context(self, func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            if not self.initiated:
+                self.init()
+            with self():
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    def async_context(self, func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            if not self.initiated:
+                self.init()
+            async with self():
+                return await func(*args, **kwargs)
+
+        return wrapper
 
     def _check_optional_components(self):
         exceptions = []
