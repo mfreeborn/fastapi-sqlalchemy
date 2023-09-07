@@ -86,16 +86,23 @@ class ModelBase(object):
     async def save(self) -> None:
         t_e = self.session.sync_session.expire_on_commit
         self.session.expire_on_commit = False
-        self.session.add(self)
+        try:
+            self.session.add(self)
+            self.session.expunge(self)
+
+        except:
+            pass
         await self.session.commit()
         self.session.sync_session.expire_on_commit = t_e
 
     @awaitable(save)
     def save(self) -> None:
-        self.sync_session.add(self)
-        self.sync_session.commit()
-        if type(self.session) == AsyncSession:
+        try:
+            self.sync_session.add(self)
             self.sync_session.expunge(self)
+        except:
+            pass
+        self.sync_session.commit()
 
     async def update(self, **kwargs):
         for attr, value in kwargs.items():

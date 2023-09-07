@@ -130,7 +130,7 @@ class SQLAlchemy:
         self.engine_args = engine_args or {}
         self.async_engine_args = async_engine_args or {}
         self.sync_session_args = session_args or {}
-        self.async_session_args = async_session_args or {"expire_on_commit": False}
+        self.async_session_args = async_session_args or {}
         self.commit_on_exit = commit_on_exit
         self.session_manager: DBSession = _session_manager
         self.verbose = verbose
@@ -147,6 +147,9 @@ class SQLAlchemy:
         self.async_session_maker: async_sessionmaker = None
         if self.url:
             self.init()
+        self.sync_session_args["expire_on_commit"] = self.async_session_args[
+            "expire_on_commit"
+        ] = False
 
     def init(
         self,

@@ -68,29 +68,29 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
         for db in self.dbs:
             db.create_all()
 
-    def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
+    async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
         req_async = False
         for route in self.app.app.app.routes:
             if route.path == request.scope["path"]:
                 req_async = inspect.iscoroutinefunction(route.endpoint)
 
-        async def dispatch_inner():
-            token = start_session()
-            async with AsyncExitStack() as async_stack:
-                with ExitStack() as sync_stack:
-                    contexts = [
-                        await async_stack.enter_async_context(ctx())
-                        and sync_stack.enter_context(ctx())
-                        for ctx in self.dbs
-                    ]
-                    response = await call_next(request)
-            reset_session(token)
-            return response
-
-        if req_async:
-            return dispatch_inner()
-        else:
-            with ExitStack() as stack:
-                contexts = [stack.enter_context(ctx()) for ctx in self.dbs]
-                response = call_next(request)
+        token = start_session()
+        async with AsyncExitStack() as async_stack:
+            with ExitStack() as sync_stack:
+                contexts = [
+                    await async_stack.enter_async_context(ctx())
+                    for ctx in self.dbs
+                    if ctx.async_ and req_async
+                ]
+                contexts.extend([sync_stack.enter_context(ctx()) for ctx in self.dbs])
+                response = await call_next(request)
+        reset_session(token)
         return response
+
+        # if req_async:
+        #     return dispatch_inner()
+        # else:
+        #     with ExitStack() as stack:
+        #         contexts = [stack.enter_context(ctx()) for ctx in self.dbs]
+        #         response = call_next(request)
+        # return response
