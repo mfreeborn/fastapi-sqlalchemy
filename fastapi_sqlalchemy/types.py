@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import ast
 import asyncio
+import inspect
 from typing import Any, Awaitable, Callable, Coroutine, List, Optional, Self, Union, overload
 
 from curio.meta import from_coroutine
@@ -28,6 +30,10 @@ class ModelBase(object):
     @property
     def session(self) -> Session | AsyncSession:
         return self.db.session
+
+    @property
+    def sync_session(self) -> Session:
+        return self.db.sync_session
 
     async def new(cls, **kwargs) -> Self:
         obj: Self = cls(**kwargs)
@@ -79,15 +85,17 @@ class ModelBase(object):
 
     async def save(self) -> None:
         t_e = self.session.sync_session.expire_on_commit
-        self.session.sync_session.expire_on_commit = False
+        self.session.expire_on_commit = False
         self.session.add(self)
         await self.session.commit()
         self.session.sync_session.expire_on_commit = t_e
 
     @awaitable(save)
     def save(self) -> None:
-        self.session.add(self)
-        self.session.commit()
+        self.sync_session.add(self)
+        self.sync_session.commit()
+        if type(self.session) == AsyncSession:
+            self.sync_session.expunge(self)
 
     async def update(self, **kwargs):
         for attr, value in kwargs.items():
@@ -106,5 +114,5 @@ class ModelBase(object):
 
     @awaitable(delete)
     def delete(self):
-        self.session.delete(self)
-        self.session.commit()
+        self.sync_session.delete(self)
+        self.sync_session.commit()

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import ast
 import asyncio
 import gc
+import inspect
 import warnings
 from contextvars import ContextVar, Token
 from typing import Any, Dict, List, Literal, Optional, Type, Union
 
+from curio.meta import from_coroutine
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.engine.url import URL
@@ -32,11 +35,13 @@ try:
 except ImportError:
     create_async_engine = None
 
-_session: ContextVar[Dict[str, Session | AsyncSession]] = ContextVar("_session", default={})
+_session: ContextVar[Dict[str, Dict[SQLAlchemy, Session | AsyncSession]]] = ContextVar(
+    "_session", default={"sync": {}, "async": {}}
+)
 
 
 def start_session() -> Token[Dict[str, Session | AsyncSession]]:
-    return _session.set({})
+    return _session.set({"sync": {}, "async": {}})
 
 
 def reset_session(token: Token[Dict[str, Session | AsyncSession]]) -> None:
@@ -52,25 +57,23 @@ class DBSession:
             raise SessionNotInitialisedError
         session = self.db.sync_session_maker(**self.db.sync_session_args)
         session_dict = _session.get()
-        session_dict[self.db] = session
+        session_dict["sync"][self.db] = session
         _session.set(session_dict)
 
         return self.db
 
     def __exit__(self, exc_type, exc_value, traceback):
-        sess = self.db.session
         if exc_type is not None:
-            sess.rollback()
+            self.db.session.rollback()
 
         elif self.db.commit_on_exit:
             try:
-                sess.commit()
+                self.db.sync_session.commit()
             except:
-                sess.rollback()
-        sess.close()
-        del sess
+                self.db.sync_session.rollback()
+        self.db.sync_session.close()
         session_dict = _session.get()
-        session_dict.pop(self.db)
+        session_dict["sync"].pop(self.db)
         _session.set(session_dict)
 
     async def __aenter__(self):
@@ -78,22 +81,21 @@ class DBSession:
             raise SessionNotInitialisedError
         session = self.db.async_session_maker(**self.db.async_session_args)
         session_dict = _session.get()
-        session_dict[self.db] = session
+        session_dict["async"][self.db] = session
         _session.set(session_dict)
         return self.db
 
     async def __aexit__(self, exc_type, exc_value, traceback):
-        sess = self.db.session
         if exc_type is not None:
-            await sess.rollback()
+            await self.db.session.rollback()
         elif self.db.commit_on_exit:
             try:
-                await sess.commit()
+                await self.db.session.commit()
             except:
-                await sess.rollback()
+                await self.db.session.rollback()
         await self.db.session.close()
         session_dict = _session.get()
-        session_dict.pop(self.db)
+        session_dict["async"].pop(self.db)
         _session.set(session_dict)
 
 
@@ -257,18 +259,23 @@ class SQLAlchemy:
 
     @property
     def session(self) -> Union[Session, AsyncSession]:
-        s: Union[Session, AsyncSession] = _session.get()[self]
-        if not s:
+        sessions = _session.get()
+        if sessions["async"].get(self):
+            return sessions["async"][self]
+        elif sessions["sync"].get(self):
+            return sessions["sync"][self]
+        else:
             raise SessionNotInitialisedError
-        return s
 
     @property
     def sync_session(self) -> Session:
-        s = self.session
-        if self.async_ and type(s) == AsyncSession:
-            return s.sync_session
+        sessions = _session.get()
+        if sessions["sync"].get(self):
+            return sessions["sync"][self]
+        elif sessions["async"].get(self):
+            return sessions["async"][self].sync_session
         else:
-            raise SessionNotAsync
+            raise SessionNotInitialisedError
 
     def _make_dialects(self) -> None:
         self.BigInteger = BigInteger()

@@ -80,8 +80,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                 with ExitStack() as sync_stack:
                     contexts = [
                         await async_stack.enter_async_context(ctx())
-                        if ctx.async_
-                        else sync_stack.enter_context(ctx())
+                        and sync_stack.enter_context(ctx())
                         for ctx in self.dbs
                     ]
                     response = await call_next(request)
