@@ -62,19 +62,33 @@ class DBSession:
 
         return self.db
 
+    def __enter__(self):
+        if not isinstance(self.db.sync_session_maker, sessionmaker):
+            raise SessionNotInitialisedError
+        session = self.db.sync_session_maker(**self.db.sync_session_args)
+        session_dict = _session.get()
+        session_dict["sync"][self.db] = session
+        _session.set(session_dict)
+
+        return self.db
+
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is not None:
-            self.db.session.rollback()
+            self.db.sync_session.rollback()
 
         elif self.db.commit_on_exit:
             try:
                 self.db.sync_session.commit()
-            except:
                 self.db.sync_session.rollback()
-        self.db.sync_session.close()
-        session_dict = _session.get()
-        session_dict["sync"].pop(self.db)
-        _session.set(session_dict)
+            except:
+                pass
+        try:
+            self.db.sync_session.close()
+            session_dict = _session.get()
+            session_dict["sync"].pop(self.db)
+            _session.set(session_dict)
+        except:
+            pass
 
     async def __aenter__(self):
         if not isinstance(self.db.async_session_maker, async_sessionmaker):
@@ -91,12 +105,16 @@ class DBSession:
         elif self.db.commit_on_exit:
             try:
                 await self.db.session.commit()
-            except:
                 await self.db.session.rollback()
-        await self.db.session.close()
-        session_dict = _session.get()
-        session_dict["async"].pop(self.db)
-        _session.set(session_dict)
+            except:
+                pass
+        try:
+            await self.db.session.close()
+            session_dict = _session.get()
+            session_dict["async"].pop(self.db)
+            _session.set(session_dict)
+        except:
+            pass
 
 
 class SQLAlchemy:
