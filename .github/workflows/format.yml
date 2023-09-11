@@ -1,0 +1,36 @@
+name: Format Code
+
+on:
+  push:
+    branches:
+      - master
+      - development  
+
+jobs:
+  format-python:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11 
+
+      - name: Install dependencies
+        run: pip install black
+
+      - name: Format code with Black
+        run: black .
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -am "Auto-format Python code with Black"
+          git push
+
+      - name: Complete
+        run: echo "Code formatting complete!"
