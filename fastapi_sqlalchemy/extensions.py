@@ -52,25 +52,19 @@ def reset_session(token: Token[Dict[str, Session | AsyncSession]]) -> None:
 class DBSession:
     def __init__(self, db: SQLAlchemy):
         self.db = db
+        self.child_session_sync = False
+        self.child_session_async = False
 
     def __enter__(self):
         if not isinstance(self.db.sync_session_maker, sessionmaker):
             raise SessionNotInitialisedError
         session = self.db.sync_session_maker(**self.db.sync_session_args)
         session_dict = _session.get()
-        session_dict["sync"][self.db] = session
-        _session.set(session_dict)
-
-        return self.db
-
-    def __enter__(self):
-        if not isinstance(self.db.sync_session_maker, sessionmaker):
-            raise SessionNotInitialisedError
-        session = self.db.sync_session_maker(**self.db.sync_session_args)
-        session_dict = _session.get()
-        session_dict["sync"][self.db] = session
-        _session.set(session_dict)
-
+        if not session_dict["sync"].get(self.db):
+            session_dict["sync"][self.db] = session
+            _session.set(session_dict)
+        else:
+            self.child_session_sync = True
         return self.db
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -84,10 +78,11 @@ class DBSession:
             except:
                 pass
         try:
-            self.db.sync_session.close()
-            session_dict = _session.get()
-            session_dict["sync"].pop(self.db)
-            _session.set(session_dict)
+            if not self.child_session_sync:
+                self.db.sync_session.close()
+                session_dict = _session.get()
+                session_dict["sync"].pop(self.db)
+                _session.set(session_dict)
         except:
             pass
 
@@ -96,8 +91,11 @@ class DBSession:
             raise SessionNotInitialisedError
         session = self.db.async_session_maker(**self.db.async_session_args)
         session_dict = _session.get()
-        session_dict["async"][self.db] = session
-        _session.set(session_dict)
+        if not session_dict["async"].get(self.db):
+            session_dict["async"][self.db] = session
+            _session.set(session_dict)
+        else:
+            self.child_session_async = True
         return self.db
 
     async def __aexit__(self, exc_type, exc_value, traceback):
@@ -110,10 +108,11 @@ class DBSession:
             except:
                 pass
         try:
-            await self.db.session.close()
-            session_dict = _session.get()
-            session_dict["async"].pop(self.db)
-            _session.set(session_dict)
+            if not self.child_session_async:
+                await self.db.session.close()
+                session_dict = _session.get()
+                session_dict["async"].pop(self.db)
+                _session.set(session_dict)
         except:
             pass
 
