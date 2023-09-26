@@ -1,0 +1,285 @@
+{
+	"info": {
+		"_postman_id": "eeaa761a-e9ab-4fa7-bc41-23b54b5c6a45",
+		"name": "fastapi-sqlalchemy examples",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21601362"
+	},
+	"item": [
+		{
+			"name": "Single database",
+			"item": [{
+				"name": "Get All Users",
+				"request": {
+				  "method": "GET",
+				  "header": [],
+				  "body": {},
+				  "url": {
+					"raw": "{{base_url}}/users",
+					"protocol": "http",
+					"host": ["{{host}}"],
+					"path": ["users"]
+				  }
+				},
+				"response": []
+			  },
+			  {
+				"name": "Add New User",
+				"request": {
+				  "method": "POST",
+				  "header": [
+					{
+					  "key": "Content-Type",
+					  "value": "application/json"
+					}
+				  ],
+				  "body": {
+					"mode": "raw",
+					"raw": "{\"name\": \"John Doe\",\"email\": \"john@example.com\"}"
+				  },
+				  "url": {
+					"raw": "{{base_url}}/add_user",
+					"protocol": "http",
+					"host": ["{{host}}"],
+					"path": ["add_user"]
+				  }
+				},
+				"response": []
+			  },
+			  {
+				"name": "Update User",
+				"request": {
+				  "method": "POST",
+				  "header": [
+					{
+					  "key": "Content-Type",
+					  "value": "application/json"
+					}
+				  ],
+				  "body": {
+					"mode": "raw",
+					"raw": "{\"id\": 1, \"name\": \"Updated Name\",\"email\": \"updated@example.com\"}"
+				  },
+				  "url": {
+					"raw": "{{base_url}}/update_user",
+					"protocol": "http",
+					"host": ["{{host}}"],
+					"path": ["update_user"]
+				  }
+				},
+				"response": []
+			  }]
+		},
+		{
+			"name": "Multi Database",
+			"item": [{
+				"name": "Retrieve All Users",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/users",
+						"protocol": "http",
+						"host": [
+							"{{host}}"
+						],
+						"path": [
+							"users"
+						]
+					}
+				},
+				"response": []
+			},
+			{
+				"name": "Add User",
+				"request": {
+					"method": "POST",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": {
+						"mode": "raw",
+						"raw": {
+							"name": "John Doe",
+							"email": "john@example.com"
+						}
+					},
+					"url": {
+						"raw": "{{base_url}}/add_user",
+						"protocol": "http",
+						"host": [
+							"{{host}}"
+						],
+						"path": [
+							"add_user"
+						]
+					}
+				},
+				"response": []
+			},
+			{
+				"name": "Update User",
+				"request": {
+					"method": "POST",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": {
+						"mode": "raw",
+						"raw": {
+							"id": 1,
+							"name": "Updated Name"
+						}
+					},
+					"url": {
+						"raw": "{{base_url}}/update_user",
+						"protocol": "http",
+						"host": [
+							"{{host}}"
+						],
+						"path": [
+							"update_user"
+						]
+					}
+				},
+				"response": []
+			},
+			{
+				"name": "Get Posts by User ID",
+				"request": {
+					"method": "GET",
+					"header": [],
+					"url": {
+						"raw": "{{base_url}}/posts?user_id=1",
+						"protocol": "http",
+						"host": [
+							"{{host}}"
+						],
+						"path": [
+							"posts"
+						],
+						"query": [
+							{
+								"key": "user_id",
+								"value": "1"
+							}
+						]
+					}
+				},
+				"response": []
+			},
+			{
+				"name": "Add Post",
+				"request": {
+					"method": "POST",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": {
+						"mode": "raw",
+						"raw": {
+							"user_id": 1,
+							"title": "New Post",
+							"content": "This is a new post content."
+						}
+					},
+					"url": {
+						"raw": "{{base_url}}/add_post",
+						"protocol": "http",
+						"host": [
+							"{{host}}"
+						],
+						"path": [
+							"add_post"
+						]
+					}
+				},
+				"response": []
+			}]
+		},
+		{
+			"name": "legacy",
+			"item": [{
+				"name": "Retrieve All Users",
+				"request": {
+				  "method": "GET",
+				  "header": [],
+				  "url": {
+					"raw": "{{base_url}}/users",
+					"protocol": "http",
+					"host": [
+					  "{{host}}"
+					],
+					"path": [
+					  "users"
+					]
+				  }
+				},
+				"response": []
+			  },
+			  {
+				"name": "Add a New User",
+				"request": {
+				  "method": "POST",
+				  "header": [
+					{
+					  "key": "Content-Type",
+					  "value": "application/json"
+					}
+				  ],
+				  "body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"johndoe@example.com\"\n}"
+				  },
+				  "url": {
+					"raw": "{{base_url}}/add_user",
+					"protocol": "http",
+					"host": [
+					  "{{host}}"
+					],
+					"path": [
+					  "add_user"
+					]
+				  }
+				},
+				"response": []
+			  },
+			  {
+				"name": "Update User Information",
+				"request": {
+				  "method": "POST",
+				  "header": [
+					{
+					  "key": "Content-Type",
+					  "value": "application/json"
+					}
+				  ],
+				  "body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": 1,\n    \"name\": \"Updated Name\",\n    \"email\": \"updated@example.com\"\n}"
+				  },
+				  "url": {
+					"raw": "{{base_url}}/update_user",
+					"protocol": "http",
+					"host": [
+					  "{{host}}"
+					],
+					"path": [
+					  "update_user"
+					]
+				  }
+				},
+				"response": []
+			  }]
+		}
+	]
+}

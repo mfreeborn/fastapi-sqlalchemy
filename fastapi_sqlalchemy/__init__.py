@@ -1,5 +1,7 @@
-from fastapi_sqlalchemy.middleware import DBSessionMiddleware, db
+from .extensions import SQLAlchemy, db
+from .middleware import DBSessionMiddleware
+from .types import ModelBase
 
-__all__ = ["db", "DBSessionMiddleware"]
+__all__ = ["db", "DBSessionMiddleware", "SQLAlchemy"]
 
-__version__ = "0.2.1"
+__version__ = "0.5.3"

@@ -1,88 +1,98 @@
-from contextvars import ContextVar
-from typing import Dict, Optional, Union
+from __future__ import annotations
 
-from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
+import asyncio
+import inspect
+import logging
+from contextlib import AsyncExitStack, ExitStack
+from typing import Dict, List, Optional, Union
+
+from curio.meta import from_coroutine
 from sqlalchemy.engine.url import URL
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.types import ASGIApp
 
-from fastapi_sqlalchemy.exceptions import MissingSessionError, SessionNotInitialisedError
+from .exceptions import SQLAlchemyType
+from .extensions import SQLAlchemy
+from .extensions import db as db_
+from .extensions import reset_session, start_session
 
-_Session: sessionmaker = None
-_session: ContextVar[Optional[Session]] = ContextVar("_session", default=None)
+
+class DBStateMap:
+    def __init__(self):
+        self.dbs: Dict[URL, sessionmaker] = {}
+        self.initialized = False
+
+    def __getitem__(self, item: URL) -> sessionmaker:
+        return self.dbs[item]
+
+    def __setitem__(self, key: URL, value: sessionmaker) -> None:
+        if not self.initialized:
+            self.dbs[key] = value
+        else:
+            raise ValueError("DBStateMap is already initialized")
+
+
+def is_async():
+    try:
+        asyncio.get_running_loop()
+        return True
+    except RuntimeError:
+        return False
 
 
 class DBSessionMiddleware(BaseHTTPMiddleware):
     def __init__(
         self,
         app: ASGIApp,
-        db_url: Optional[Union[str, URL]] = None,
-        custom_engine: Optional[Engine] = None,
-        engine_args: Dict = None,
-        session_args: Dict = None,
-        commit_on_exit: bool = False,
+        db: Optional[Union[List[SQLAlchemy], SQLAlchemy]] = None,
+        db_url: Optional[URL] = None,
+        **options,
     ):
         super().__init__(app)
-        global _Session
-        engine_args = engine_args or {}
-        self.commit_on_exit = commit_on_exit
-
-        session_args = session_args or {}
-        if not custom_engine and not db_url:
-            raise ValueError("You need to pass a db_url or a custom_engine parameter.")
-        if not custom_engine:
-            engine = create_engine(db_url, **engine_args)
-        else:
-            engine = custom_engine
-        _Session = sessionmaker(bind=engine, **session_args)
+        self.state_map = DBStateMap()
+        if not (type(db) == list or type(db) == SQLAlchemy) and not db_url:
+            raise SQLAlchemyType()
+        if db_url and not db:
+            global db_
+            if not db_.initiated:
+                db_.init(url=db_url, **options)
+            self.dbs = [db_]
+        if type(db) == SQLAlchemy:
+            self.dbs = [
+                db,
+            ]
+        elif type(db) == list:
+            self.dbs = db
+        for db in self.dbs:
+            db.create_all()
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
-        with db(commit_on_exit=self.commit_on_exit):
-            response = await call_next(request)
+        req_async = False
+        try:
+            for route in self.app.app.app.routes:
+                if route.path == request.scope["path"]:
+                    req_async = inspect.iscoroutinefunction(route.endpoint)
+        except:
+            req_async = False
+        token = start_session()
+        async with AsyncExitStack() as async_stack:
+            with ExitStack() as sync_stack:
+                contexts = [
+                    await async_stack.enter_async_context(ctx())
+                    for ctx in self.dbs
+                    if ctx.async_ and req_async
+                ]
+                contexts.extend([sync_stack.enter_context(ctx()) for ctx in self.dbs])
+                response = await call_next(request)
+        reset_session(token)
         return response
 
-
-class DBSessionMeta(type):
-    # using this metaclass means that we can access db.session as a property at a class level,
-    # rather than db().session
-    @property
-    def session(self) -> Session:
-        """Return an instance of Session local to the current async context."""
-        if _Session is None:
-            raise SessionNotInitialisedError
-
-        session = _session.get()
-        if session is None:
-            raise MissingSessionError
-
-        return session
-
-
-class DBSession(metaclass=DBSessionMeta):
-    def __init__(self, session_args: Dict = None, commit_on_exit: bool = False):
-        self.token = None
-        self.session_args = session_args or {}
-        self.commit_on_exit = commit_on_exit
-
-    def __enter__(self):
-        if not isinstance(_Session, sessionmaker):
-            raise SessionNotInitialisedError
-        self.token = _session.set(_Session(**self.session_args))
-        return type(self)
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        sess = _session.get()
-        if exc_type is not None:
-            sess.rollback()
-
-        if self.commit_on_exit:
-            sess.commit()
-
-        sess.close()
-        _session.reset(self.token)
-
-
-db: DBSessionMeta = DBSession
+        # if req_async:
+        #     return dispatch_inner()
+        # else:
+        #     with ExitStack() as stack:
+        #         contexts = [stack.enter_context(ctx()) for ctx in self.dbs]
+        #         response = call_next(request)
+        # return response
