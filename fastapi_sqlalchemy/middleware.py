@@ -70,10 +70,12 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint):
         req_async = False
-        for route in self.app.app.app.routes:
-            if route.path == request.scope["path"]:
-                req_async = inspect.iscoroutinefunction(route.endpoint)
-
+        try:
+            for route in self.app.app.app.routes:
+                if route.path == request.scope["path"]:
+                    req_async = inspect.iscoroutinefunction(route.endpoint)
+        except:
+            req_async = False
         token = start_session()
         async with AsyncExitStack() as async_stack:
             with ExitStack() as sync_stack:
