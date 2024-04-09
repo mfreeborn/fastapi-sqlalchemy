@@ -1,6 +1,6 @@
 <!-- [![image](https://github.com/Ewen-Zippedscript/fastapi-sqlalchemy/workflows/ci/badge.svg)](https://github.com/Ewen-Zippedscript/fastapi-sqlalchemy/actions) -->
 <!-- [![image](https://codecov.io/gh/mfreeborn/fastapi-sqlalchemy/branch/master/graph/badge.svg)](https://codecov.io/gh/mfreeborn/fastapi-sqlalchemy) -->
-[![image](https://img.shields.io/pypi/v/FastAPI-SQLAlchemy-improved?color=blue)](https://pypi.org/project/FastAPI-SQLAlchemy-improved/)
+[![image](https://img.shields.io/pypi/v/FastAPI-SQLAlchemy?color=blue)](https://pypi.org/project/FastAPI-SQLAlchemy/)
 
 FastAPI-SQLAlchemy provides a simple integration between
 [FastAPI](https://github.com/tiangolo/fastapi) and
