@@ -92,10 +92,10 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                     exception = e
                     for db in self.dbs:
                         db.session.rollback()
-                    
+
         if exception:
             raise exception
-        
+
         reset_session(token)
         return response
 

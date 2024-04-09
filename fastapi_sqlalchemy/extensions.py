@@ -169,11 +169,7 @@ class SQLAlchemy:
             False
         )
 
-    def init(
-        self,
-        url: Optional[URL] = None,
-        **options
-    ) -> None:
+    def init(self, url: Optional[URL] = None, **options) -> None:
         if url:
             self.url = url
         for key, value in options.items():
