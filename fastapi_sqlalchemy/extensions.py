@@ -165,9 +165,9 @@ class SQLAlchemy:
         self.async_session_maker: async_sessionmaker = None
         if self.url:
             self.init()
-        self.sync_session_args["expire_on_commit"] = self.async_session_args[
-            "expire_on_commit"
-        ] = False
+        self.sync_session_args["expire_on_commit"] = self.async_session_args["expire_on_commit"] = (
+            False
+        )
 
     def init(
         self,
