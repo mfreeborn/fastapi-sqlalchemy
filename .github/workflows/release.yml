@@ -1,49 +1,50 @@
 name: release
 on:
   push:
-    tags:
-    - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches:
+        - master
 
 jobs:
   create-pypi-release:
-    name: create-pypi-release
     runs-on: ubuntu-latest
+
+    name: Build and publish package for Python >=3.7
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     
-    - name: Set up Python 3.7
+    
+    - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: 3.7
+        python-version: '3.11'
+    
+    - name: Install poetry
+      run: |
+          pip install poetry
 
-    - name: Install the dependencies
-      run: pip install --upgrade pip wheel setuptools
-    
-    - name: Build the distributions
-      run: python setup.py sdist bdist_wheel
-    
-    - name: Upload to PyPI
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        password: ${{ secrets.PYPI_TOKEN }}
+    - name: Build the distribution
+      run: poetry build
 
-  create-gh-releases-release:
-    name: create-gh-releases-release
-    runs-on: ubuntu-latest
-    env:
-      VERSION:
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+    - name: Publish Package
+      run: poetry publish -p ${{ secrets.PYPI_TOKEN }}
+      
+  # create-gh-releases-release:
+  #   name: create-gh-releases-release
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     VERSION:
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v2
     
-    - name: Get the version
-      run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/}
+  #   - name: Get the version
+  #     run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/}
     
-    - name: Create release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      uses: actions/create-release@v1
-      with:
-        tag_name: ${{ env.VERSION }}
-        release_name: ${{ env.VERSION }}
+  #   - name: Create release
+  #     env:
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     uses: actions/create-release@v1
+  #     with:
+  #       tag_name: ${{ env.VERSION }}
+  #       release_name: ${{ env.VERSION }}
