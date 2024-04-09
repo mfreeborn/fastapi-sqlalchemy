@@ -17,3 +17,21 @@ include_trailing_comma = true
 force_grid_wrap = 0
 use_parentheses = true
 line_length = 100
+[tool.poetry]
+name = "fastapi-sqlalchemy"
+version = "1.0.0"
+description = "Adds simple SQLAlchemy support with multiple databases to FastAPI"
+authors = ["Ewen Lorimer <ewen@zippedscript.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.7"
+starlette = ">=0.12.9"
+sqlalchemy = ">=1.2"
+fastapi = ">=0.52.0"
+curio = ">=1.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -171,7 +171,16 @@ class SQLAlchemy:
 
     def init(
         self,
+        url: Optional[URL] = None,
+        **options
     ) -> None:
+        if url:
+            self.url = url
+        for key, value in options.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise AttributeError(f"Attribute {key} not a valid attribute.")
         if not self.custom_engine and not self.url:
             raise ValueError("You need to pass a url or a custom_engine parameter.")
         if not self.async_custom_engine and not self.async_url and self.async_:
