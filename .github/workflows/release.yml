@@ -27,7 +27,7 @@ jobs:
       run: poetry build
 
     - name: Publish Package
-      run: poetry publish -p ${{ secrets.PYPI_TOKEN }}
+      run: poetry publish -u __token__ -p ${{ secrets.PYPI_TOKEN }}
       
   # create-gh-releases-release:
   #   name: create-gh-releases-release
