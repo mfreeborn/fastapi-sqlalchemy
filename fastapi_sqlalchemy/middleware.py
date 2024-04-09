@@ -77,6 +77,7 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
         except:
             req_async = False
         token = start_session()
+        exception = None
         async with AsyncExitStack() as async_stack:
             with ExitStack() as sync_stack:
                 contexts = [
@@ -85,7 +86,16 @@ class DBSessionMiddleware(BaseHTTPMiddleware):
                     if ctx.async_ and req_async
                 ]
                 contexts.extend([sync_stack.enter_context(ctx()) for ctx in self.dbs])
-                response = await call_next(request)
+                try:
+                    response = await call_next(request)
+                except Exception as e:
+                    exception = e
+                    for db in self.dbs:
+                        db.session.rollback()
+                    
+        if exception:
+            raise exception
+        
         reset_session(token)
         return response
 
